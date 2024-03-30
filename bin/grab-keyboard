@@ -12,7 +12,7 @@ filter_and_parse_key_events() {
   #     1711772187.658800 3 KEY_2 0
   #
   # which means that the "2" key was unpressed.
-  sed --unbuffered -n 's/^Event: time \([0-9]\+\(\.[0-9]\+\)\?\), type 1 (EV_KEY), code \([0-9]\+\) (\(\w\+\)), value \([01]\)\s*$/\1 \3 \4 \5/p'
+  sed -u -n 's/^Event: time \([0-9]\+\(\.[0-9]\+\)\?\), type 1 (EV_KEY), code \([0-9]\+\) (\(\w\+\)), value \([01]\)\s*$/\1 \3 \4 \5/p'
 }
 
 print_char() {
