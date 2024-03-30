@@ -30,7 +30,7 @@ print_char() {
 keypresses_to_text() {
   # TODO: document
   shift_state=0 # 1->down, 0->up
-  while read -r time code name value; do
+  while read -r _ code name value; do
     if [ "$name" = KEY_LEFTSHIFT ]; then
       shift_state=$value
     elif [ "$value" -eq 1 ]; then
@@ -82,7 +82,7 @@ keypresses_to_text() {
         KEY_SLASH) print_char "$shift_state" '/' '?' ;;
         KEY_SPACE) printf ' ' ;;
         KEY_TAB) printf '\t' ;;
-        *) >2 printf 'Unknown key %s with code %s\n' "$name" "$code" ;;
+        *) >&2 printf 'Unknown key %s with code %s\n' "$name" "$code" ;;
       esac
     fi
   done
