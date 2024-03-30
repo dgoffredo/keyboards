@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# TODO: usage info
+
+satisfies_conditions() {
+  # satisfies_conditions <device_path> [<key>=<value>] ...
+  #
+  # The <keys> come from the "E:" prefixed output of `udevadm info`.
+  path=$1
+  shift
+  properties=$(udevadm info "$path")
+  for condition in "$@"; do
+    >/dev/null grep -F -i "E: $condition" <<END_INPUT
+$properties
+END_INPUT
+    rcode=$?
+    if [ "$rcode" -ne 0 ]; then
+      return 1
+    fi
+  done
+  return 0
+}
+
+for path in /dev/input/by-path/*-event-kbd; do
+  if satisfies_conditions "$path" "$@"; then
+    echo "$path"
+  fi
+done

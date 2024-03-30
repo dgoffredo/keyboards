@@ -1,0 +1,91 @@
+#!/bin/sh
+
+# TODO: usage info
+
+filter_and_parse_key_events() {
+  # Example EV_KEY event line:
+  #
+  #     Event: time 1711772187.658800, type 1 (EV_KEY), code 3 (KEY_2), value 0
+  #
+  # We want to print out the time, code, KEY_* (name), and value, so:
+  #
+  #     1711772187.658800 3 KEY_2 0
+  #
+  # which means that the "2" key was unpressed.
+  sed --unbuffered -n 's/^Event: time \([0-9]\+\(\.[0-9]\+\)\?\), type 1 (EV_KEY), code \([0-9]\+\) (\(\w\+\)), value \([01]\)\s*$/\1 \3 \4 \5/p'
+}
+
+print_char() {
+  # TODO: document
+  shift_state=$1
+  without_shift=$2
+  with_shift=$3
+  if [ "$shift_state" -eq 1 ]; then
+    printf '%s' "$with_shift"
+  else
+    printf '%s' "$without_shift"
+  fi
+}
+
+keypresses_to_text() {
+  # TODO: document
+  shift_state=0 # 1->down, 0->up
+  while read -r time code name value; do
+    if [ "$name" = KEY_LEFTSHIFT ]; then
+      shift_state=$value
+    elif [ "$value" -eq 1 ]; then
+      case "$name" in
+        KEY_0) print_char "$shift_state" '0' ')' ;;
+        KEY_1) print_char "$shift_state" '1' '!' ;;
+        KEY_2) print_char "$shift_state" '2' '@' ;;
+        KEY_3) print_char "$shift_state" '3' '#' ;;
+        KEY_4) print_char "$shift_state" '4' '$' ;;
+        KEY_5) print_char "$shift_state" '5' '%' ;;
+        KEY_6) print_char "$shift_state" '6' '^' ;;
+        KEY_7) print_char "$shift_state" '7' '&' ;;
+        KEY_8) print_char "$shift_state" '8' '*' ;;
+        KEY_9) print_char "$shift_state" '9' '(' ;;
+        KEY_A) print_char "$shift_state" 'a' 'A' ;;
+        KEY_B) print_char "$shift_state" 'b' 'B' ;;
+        KEY_C) print_char "$shift_state" 'c' 'C' ;;
+        KEY_D) print_char "$shift_state" 'd' 'D' ;;
+        KEY_E) print_char "$shift_state" 'e' 'E' ;;
+        KEY_F) print_char "$shift_state" 'f' 'F' ;;
+        KEY_G) print_char "$shift_state" 'g' 'G' ;;
+        KEY_H) print_char "$shift_state" 'h' 'H' ;;
+        KEY_I) print_char "$shift_state" 'i' 'I' ;;
+        KEY_J) print_char "$shift_state" 'j' 'J' ;;
+        KEY_K) print_char "$shift_state" 'k' 'K' ;;
+        KEY_L) print_char "$shift_state" 'l' 'L' ;;
+        KEY_M) print_char "$shift_state" 'm' 'M' ;;
+        KEY_N) print_char "$shift_state" 'n' 'N' ;;
+        KEY_O) print_char "$shift_state" 'o' 'O' ;;
+        KEY_P) print_char "$shift_state" 'p' 'P' ;;
+        KEY_Q) print_char "$shift_state" 'q' 'Q' ;;
+        KEY_R) print_char "$shift_state" 'r' 'R' ;;
+        KEY_S) print_char "$shift_state" 's' 'S' ;;
+        KEY_T) print_char "$shift_state" 't' 'T' ;;
+        KEY_U) print_char "$shift_state" 'u' 'U' ;;
+        KEY_V) print_char "$shift_state" 'v' 'V' ;;
+        KEY_W) print_char "$shift_state" 'w' 'W' ;;
+        KEY_X) print_char "$shift_state" 'x' 'X' ;;
+        KEY_Y) print_char "$shift_state" 'y' 'Y' ;;
+        KEY_Z) print_char "$shift_state" 'z' 'Z' ;;
+        KEY_DOT) print_char "$shift_state" '.' '>' ;;
+        KEY_ENTER) printf '\n ' ;;
+        KEY_EQUAL) print_char "$shift_state" '=' '+' ;;
+        KEY_KPMINUS) print_char "$shift_state" '-' '_' ;;
+        KEY_LEFTBRACE) print_char "$shift_state" '[' '{' ;;
+        KEY_MINUS) print_char "$shift_state" '-' '_' ;;
+        KEY_RIGHTBRACE) print_char "$shift_state" ']' '}' ;;
+        KEY_SEMICOLON) print_char "$shift_state" ';' ':' ;;
+        KEY_SLASH) print_char "$shift_state" '/' '?' ;;
+        KEY_SPACE) printf ' ' ;;
+        KEY_TAB) printf '\t' ;;
+        *) >2 printf 'Unknown key %s with code %s\n' "$name" "$code" ;;
+      esac
+    fi
+  done
+}
+
+sudo evtest --grab "$1" | filter_and_parse_key_events | keypresses_to_text
