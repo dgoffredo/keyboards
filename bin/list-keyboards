@@ -21,7 +21,7 @@ END_INPUT
   return 0
 }
 
-for path in /dev/input/by-path/*-event-kbd; do
+find /dev/input/by-path/ -name '*-event-kbd' | while read -r path; do
   if satisfies_conditions "$path" "$@"; then
     echo "$path"
   fi
